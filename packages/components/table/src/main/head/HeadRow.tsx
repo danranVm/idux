@@ -1,10 +1,11 @@
-import type { TableColumnBaseMerged, TableColumnExpandableMerged } from '../../composables/useColumns'
+import type { TableColumnBaseMerged } from '../../composables/useColumns'
 
 import { defineComponent, inject } from 'vue'
 import { tableToken } from '../../token'
 import { tableHeadRowProps } from '../../types'
 import HeadCol from './HeadCol'
 import HeadColExpand from './HeadColExpand'
+import HeadColSelect from './HeadColSelect'
 
 export default defineComponent({
   props: tableHeadRowProps,
@@ -17,7 +18,9 @@ export default defineComponent({
         .map((column, index) => {
           if ('type' in column) {
             if (column.type === 'expandable') {
-              return renderExpandCol(column)
+              return <HeadColExpand></HeadColExpand>
+            } else if (column.type === 'selectable') {
+              return <HeadColSelect></HeadColSelect>
             }
             return null
           }
@@ -45,9 +48,4 @@ function renderCol(column: TableColumnBaseMerged, index: number) {
   } = column
   const colProps = { colSpan, rowSpan, additional, align, colStart, colEnd, ellipsis, title, customTitle, key, index }
   return <HeadCol {...colProps}></HeadCol>
-}
-
-function renderExpandCol(column: TableColumnExpandableMerged) {
-  const { align, additional } = column
-  return <HeadColExpand align={align} additional={additional}></HeadColExpand>
 }

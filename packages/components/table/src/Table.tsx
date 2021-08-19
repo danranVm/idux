@@ -8,6 +8,7 @@ import { useTags } from './composables/useTags'
 import { useColumns } from './composables/useColumns'
 import { usePagination } from './composables/usePagination'
 import { useExpandable } from './composables/useExpandable'
+import { useSelectable } from './composables/useSelectable'
 import { useGetRowKey } from './composables/useGetRowKey'
 import { useDataSource } from './composables/useDataSource'
 import { tableProps } from './types'
@@ -21,11 +22,12 @@ export default defineComponent({
   setup(props, { slots }) {
     const config = useGlobalConfig('table')
     const tags = useTags(props)
+    const getRowKey = useGetRowKey(props, config)
     const { mergedColumns, flattedColumns } = useColumns(props, config)
     const { mergedPagination } = usePagination(props, config)
     const { expandable, expandedRowKeys, handleExpandChange } = useExpandable(props, flattedColumns)
-    const getRowKey = useGetRowKey(props, config)
-    const { filteredData, flattedData } = useDataSource(props, getRowKey, expandedRowKeys, mergedPagination)
+    const dataContext = useDataSource(props, getRowKey, expandedRowKeys, mergedPagination)
+    const selectableContext = useSelectable(props, flattedColumns, dataContext)
 
     provide(tableToken, {
       props,
@@ -39,14 +41,14 @@ export default defineComponent({
       expandedRowKeys,
       handleExpandChange,
       getRowKey,
-      filteredData,
-      flattedData,
+      ...dataContext,
+      ...selectableContext,
     })
 
     const spinProps = useSpinProps(props)
 
     return () => {
-      const [paginationTop, paginationBottom] = renderPagination(mergedPagination.value, filteredData.value)
+      const [paginationTop, paginationBottom] = renderPagination(mergedPagination.value, dataContext.filteredData.value)
       const children = [paginationTop, <MainTable />, paginationBottom]
       const _spinProps = spinProps.value
       const spinWrapper = _spinProps ? <IxSpin {..._spinProps}>{children}</IxSpin> : children
