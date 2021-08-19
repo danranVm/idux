@@ -48,7 +48,8 @@ export default defineComponent({
     return () => {
       const [paginationTop, paginationBottom] = renderPagination(mergedPagination.value, filteredData.value)
       const children = [paginationTop, <MainTable />, paginationBottom]
-      const spinWrapper = spinProps.value ? <IxSpin {...spinProps.value}>{children}</IxSpin> : children
+      const _spinProps = spinProps.value
+      const spinWrapper = _spinProps ? <IxSpin {..._spinProps}>{children}</IxSpin> : children
       return <div class="ix-table">{spinWrapper}</div>
     }
   },

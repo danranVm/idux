@@ -12,14 +12,14 @@ export default defineComponent({
     const { bodyColTag, slots } = inject(tableToken)!
     const classes = useClasses(props)
     return () => {
-      const { colSpan, rowSpan, additional } = props
+      const { colSpan, rowSpan, additional, disabled } = props
       const mergedProps = {
         colSpan: colSpan === 1 ? undefined : colSpan,
         rowSpan: rowSpan === 1 ? undefined : rowSpan,
         class: classes.value,
       }
 
-      const children = renderChildren(props, slots)
+      const children = disabled ? null : renderChildren(props, slots)
 
       const BodyColTag = bodyColTag.value as any
       return (
@@ -45,12 +45,11 @@ function useClasses(props: TableBodyColExpandProps) {
 
 function renderChildren(props: TableBodyColExpandProps, slots: Slots) {
   const { expanded, record, icon, customIcon, handleExpend } = props
-  const children = isFunction(customIcon) ? (
-    customIcon({ expanded, record, onExpand: handleExpend })
-  ) : isString(customIcon) ? (
-    slots[customIcon]?.({ expanded, record, onExpand: handleExpend })
-  ) : (
-    <IxIcon name={icon[expanded ? 1 : 0]} rotate={expanded ? 180 : -180} onClick={handleExpend} />
-  )
-  return children
+  if (isFunction(customIcon)) {
+    return customIcon({ expanded, record, onExpand: handleExpend })
+  }
+  if (isString(customIcon) && slots[customIcon]) {
+    return slots[customIcon]!({ expanded, record, onExpand: handleExpend })
+  }
+  return <IxIcon name={icon[expanded ? 1 : 0]} rotate={expanded ? 180 : -180} onClick={handleExpend} />
 }

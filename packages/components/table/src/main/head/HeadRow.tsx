@@ -48,6 +48,6 @@ function renderCol(column: TableColumnBaseMerged, index: number) {
 }
 
 function renderExpandCol(column: TableColumnExpandableMerged) {
-  const { additional } = column
-  return <HeadColExpand additional={additional}></HeadColExpand>
+  const { align, additional } = column
+  return <HeadColExpand align={align} additional={additional}></HeadColExpand>
 }

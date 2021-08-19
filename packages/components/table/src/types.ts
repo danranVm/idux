@@ -81,7 +81,7 @@ export interface TableColumnExpandable<T = unknown> extends TableColumnCommon<T>
   customExpand?: string | TableColumnExpandableExpandFn<T>
   customIcon?: string | TableColumnExpandableIconFn<T>
 
-  enabled?: (record: T, index: number) => boolean
+  disabled?: (record: T, index: number) => boolean
   // remove ?
   icon?: [string, string]
   indent?: number
@@ -101,7 +101,7 @@ export type TableColumnExpandableIconFn<T = unknown> = (options: {
 export interface TableColumnSelectable<T = unknown> extends TableColumnCommon<T> {
   type: 'selectable'
 
-  enabled?: (record: T, index: number) => boolean
+  disabled?: (record: T, index: number) => boolean
   multiple?: boolean
   options?: boolean | TableColumnSelectableOption[]
 
@@ -224,6 +224,7 @@ export type TableBodyColProps = IxInnerPropTypes<typeof tableBodyColProps>
 
 export const tableBodyColExpandProps = {
   ...tableCommonColProps,
+  disabled: IxPropTypes.bool.isRequired,
   expanded: IxPropTypes.bool.isRequired,
   icon: IxPropTypes.arrayOf(String).isRequired,
   index: IxPropTypes.number.isRequired,

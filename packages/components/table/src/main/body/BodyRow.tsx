@@ -29,7 +29,7 @@ export default defineComponent({
     const clickEvents = useClickEvents(expandable, expendType, handleExpend)
 
     return () => {
-      const children = renderChildren(props, flattedColumns.value, handleExpend)
+      const children = renderChildren(props, flattedColumns.value, handleExpend, expendType.value)
 
       const BodyRowTag = bodyRowTag.value as any
       const nodes = [
@@ -39,7 +39,7 @@ export default defineComponent({
       ]
 
       if (props.expanded && expendType.value === 'render') {
-        const expandedContext = renderExpanded(expandable.value, props, slots)
+        const expandedContext = renderExpandedContext(expandable.value, props, slots)
         expandedContext && nodes.push(expandedContext)
       }
       return nodes
@@ -64,15 +64,12 @@ function useClasses(props: TableBodyRowProps, tableProps: TableProps) {
 
 function useExpendType(props: TableBodyRowProps, expandable: ComputedRef<TableColumnExpandable | undefined>) {
   return computed(() => {
-    const { customExpand, enabled } = expandable.value || {}
+    const { customExpand, disabled } = expandable.value || {}
     const { record, index } = props
-    if (customExpand && (!enabled || enabled(record, index))) {
-      return 'render'
+    if (disabled && disabled(record, index)) {
+      return 'none'
     }
-    if (record?.children) {
-      return 'nest'
-    }
-    return 'none'
+    return customExpand ? 'render' : record.children ? 'nest' : 'none'
   })
 }
 
@@ -93,7 +90,12 @@ function useClickEvents(
   })
 }
 
-function renderChildren(props: TableBodyRowProps, flattedColumns: TableColumnFlatted[], handleExpend: () => void) {
+function renderChildren(
+  props: TableBodyRowProps,
+  flattedColumns: TableColumnFlatted[],
+  handleExpend: () => void,
+  expendType: 'render' | 'nest' | 'none',
+) {
   const children: VNodeTypes[] = []
   const { record, index } = props
   flattedColumns.forEach((column, colIndex) => {
@@ -104,7 +106,7 @@ function renderChildren(props: TableBodyRowProps, flattedColumns: TableColumnFla
     }
     if ('type' in column) {
       if (column.type === 'expandable') {
-        children.push(renderExpandCol(props, column, handleExpend, colSpan, rowSpan))
+        children.push(renderExpandCol(props, column, handleExpend, colSpan, rowSpan, expendType === 'none'))
       }
     } else {
       children.push(renderCol(props, column, colIndex, colSpan, rowSpan))
@@ -132,15 +134,28 @@ function renderExpandCol(
   handleExpend: () => void,
   colSpan: number | undefined,
   rowSpan: number | undefined,
+  disabled: boolean,
 ) {
   const { index, expanded, record, rowKey } = props
   const key = `${rowKey}-EXPAND`
   const { additional, icon, customIcon } = column
-  const colProps = { index, expanded, key, record, colSpan, rowSpan, additional, icon, customIcon, handleExpend }
+  const colProps = {
+    index,
+    expanded,
+    key,
+    record,
+    colSpan,
+    rowSpan,
+    additional,
+    icon,
+    customIcon,
+    handleExpend,
+    disabled,
+  }
   return <BodyColExpand {...colProps}></BodyColExpand>
 }
 
-function renderExpanded(expandable: TableColumnExpandable | undefined, props: TableBodyRowProps, slots: Slots) {
+function renderExpandedContext(expandable: TableColumnExpandable | undefined, props: TableBodyRowProps, slots: Slots) {
   const { customExpand } = expandable || {}
   const { record, index } = props
   let expandedContext: VNodeTypes | null = null

@@ -9,13 +9,12 @@ export default defineComponent({
   setup() {
     const { props, slots, flattedDataSource, bodyTag } = inject(tableToken)!
     return () => {
-      const data = flattedDataSource.value
       let children: VNodeTypes[] = []
       if (slots.alert) {
         const alertNode = slots.alert()
         children.push(<BodyRowSingle>{alertNode}</BodyRowSingle>)
       }
-
+      const data = flattedDataSource.value
       if (data.length > 0) {
         data.forEach((item, index) => children.push(<BodyRow {...item} key={item.rowKey} index={index} />))
       } else {
