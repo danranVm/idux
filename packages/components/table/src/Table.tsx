@@ -25,7 +25,7 @@ export default defineComponent({
     const { mergedPagination } = usePagination(props, config)
     const { expandable, expandedRowKeys, handleExpandChange } = useExpandable(props, flattedColumns)
     const getRowKey = useGetRowKey(props, config)
-    const { filteredData, flattedDataSource } = useDataSource(props, getRowKey, expandedRowKeys, mergedPagination)
+    const { filteredData, flattedData } = useDataSource(props, getRowKey, expandedRowKeys, mergedPagination)
 
     provide(tableToken, {
       props,
@@ -40,7 +40,7 @@ export default defineComponent({
       handleExpandChange,
       getRowKey,
       filteredData,
-      flattedDataSource,
+      flattedData,
     })
 
     const spinProps = useSpinProps(props)

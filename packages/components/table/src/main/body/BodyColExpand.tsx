@@ -1,6 +1,8 @@
+import type { ComputedRef, Slots } from 'vue'
 import type { TableBodyColExpandProps } from '../../types'
+import type { TableColumnExpandableMerged } from '../../composables/useColumns'
 
-import { computed, defineComponent, inject, Slots } from 'vue'
+import { computed, defineComponent, inject } from 'vue'
 import { isFunction, isString } from 'lodash-es'
 import { IxIcon } from '@idux/components/icon'
 import { tableToken } from '../../token'
@@ -9,21 +11,20 @@ import { tableBodyColExpandProps } from '../../types'
 export default defineComponent({
   props: tableBodyColExpandProps,
   setup(props) {
-    const { bodyColTag, slots } = inject(tableToken)!
-    const classes = useClasses(props)
+    const { bodyColTag, slots, expandable } = inject(tableToken)!
+    const classes = useClasses(props, expandable)
     return () => {
-      const { colSpan, rowSpan, additional, disabled } = props
+      const { colSpan, rowSpan, disabled } = props
       const mergedProps = {
         colSpan: colSpan === 1 ? undefined : colSpan,
         rowSpan: rowSpan === 1 ? undefined : rowSpan,
         class: classes.value,
       }
-
-      const children = disabled ? null : renderChildren(props, slots)
+      const children = disabled ? null : renderChildren(props, slots, expandable)
 
       const BodyColTag = bodyColTag.value as any
       return (
-        <BodyColTag {...mergedProps} {...additional}>
+        <BodyColTag {...mergedProps} {...expandable.value!.additional}>
           {children}
         </BodyColTag>
       )
@@ -31,9 +32,10 @@ export default defineComponent({
   },
 })
 
-function useClasses(props: TableBodyColExpandProps) {
+function useClasses(props: TableBodyColExpandProps, expandable: ComputedRef<TableColumnExpandableMerged | undefined>) {
   return computed(() => {
-    const { align, expanded } = props
+    const { align } = expandable.value!
+    const { expanded } = props
     const prefixCls = 'ix-table-td'
     return {
       [prefixCls]: true,
@@ -43,8 +45,13 @@ function useClasses(props: TableBodyColExpandProps) {
   })
 }
 
-function renderChildren(props: TableBodyColExpandProps, slots: Slots) {
-  const { expanded, record, icon, customIcon, handleExpend } = props
+function renderChildren(
+  props: TableBodyColExpandProps,
+  slots: Slots,
+  expandable: ComputedRef<TableColumnExpandableMerged | undefined>,
+) {
+  const { icon, customIcon } = expandable.value!
+  const { expanded, record, handleExpend } = props
   if (isFunction(customIcon)) {
     return customIcon({ expanded, record, onExpand: handleExpend })
   }

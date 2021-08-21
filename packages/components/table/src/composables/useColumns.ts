@@ -53,6 +53,7 @@ export interface TableColumnExpandableMerged extends TableColumnExpandable {
 export interface TableColumnSelectableMerged extends TableColumnSelectable {
   align: TableColumnAlign
   key: string | number
+  multiple: boolean
   titleColSpan: number
 }
 export type TableColumnMerged = TableColumnBaseMerged | TableColumnExpandableMerged | TableColumnSelectableMerged
@@ -154,7 +155,9 @@ function covertColumn(
       const icon = column.icon ?? expandableConfig.icon
       return { ...column, key: column.type, icon, align }
     } else {
-      return { ...column, key: column.type, align }
+      // The default value for `multiple` is true
+      const multiple = column.multiple ?? true
+      return { ...column, key: column.type, align, multiple }
     }
   } else {
     let { key, dataKey, sortable } = column
